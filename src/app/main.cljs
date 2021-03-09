@@ -3,6 +3,8 @@
             [goog.events :as gevents]
             [app.lib :as lib]))
 
+(def SIZE 9)
+
 (defrecord Game [names])
 
 (defrecord Screen [rects])
@@ -39,14 +41,17 @@
     (do
       (.save ctx)
       (set! (.-fillStyle ctx) color)
+      (println (.-fillStyle ctx))
       (draw-rect! ctx rect)
       (.restore ctx))))
 
 (defn draw-game!
   "Draws the contents of the game"
-  [ctx {:keys [rects]}]
-  (doseq [rect rects]
-    (draw-rect! ctx rect)))
+  [ctx {:keys [game screen]}]
+  (doseq [[rect name] (map list (:rects screen) (:names game))]
+    (if (= name nil)
+      (color-rect! ctx rect "#FFFFFF")
+      (color-rect! ctx rect (lib/color name)))))
 
 (defn gen-rects
   "Generates a list of size^2 rectangles with the given width and height"
@@ -60,19 +65,76 @@
 
 (defn gen-screen
   "Generates the screen object based on the full width and height"
-  [width height]
+  [width height size]
   (let [base (quot height 3)
         total-h (* base 3)
         total-w (* base 4)
-        rect-h (quot total-h 9)
-        rect-w (quot total-w 9)
+        rect-h (quot total-h size)
+        rect-w (quot total-w size)
         vert-diff (- height total-h)
         horz-diff (- width total-w)
         offset-x (quot horz-diff 2)
         offset-y (quot vert-diff 2)]
-    (Screen. (gen-rects 9 rect-w rect-h offset-x offset-y))))
+    (Screen. (gen-rects SIZE rect-w rect-h offset-x offset-y))))
 
-(def game (atom {:game (Game. [])
+(defn gen-game
+  "Generates the game"
+  [size]
+  (Game. (map (fn [x]
+                (if (and (or (= (quot x size) 5)
+                             (= (quot x size) 4))
+                         (not (= (mod x size) 4))
+                         (not (= (mod x size) 5)))
+                  [(lib/rand-letter) :A :A]
+                  nil))
+              (range 0 (* size size)))))
+
+(defn move-cells
+  "Moves the cells in the game. Returns a list of names and their indexes"
+  [prev-game size]
+  (map-indexed (fn [i name]
+                 (if (not (nil? name))
+                   (let [x (mod i size)
+                         y (quot i size)
+                         move (lib/movement name)
+                         nx (+ x (first move))
+                         ny (+ y (second move))
+                         ni (+ (* ny size) nx)]
+                     [ni name])
+                   [i name]))
+               (-> prev-game
+                   (:game)
+                   (:names))))
+
+(defn filter-collisions
+  "Group cells by their index. Collided cells will be in a list"
+  [indexed-cells size]
+  (reduce (fn [cell-map [i cell]]
+            (if (not (nil? cell))
+              (assoc cell-map i (cons cell (get cell-map i)))
+              cell-map))
+          (vec (repeat (* size size) '()))
+          indexed-cells))
+
+(defn handle-collisions
+  "Handle cells that have collided. Return list of all cells, nil where there are no names."
+  [cells]
+  (map (fn [cell-list]
+         (if (= cell-list '())
+           nil
+           (first cell-list))) ; TODO replace with actual collision logic
+       cells))
+
+(defn transition-game
+  "Returns a new game state based on the given state"
+  [prev-game size]
+  (let [new-names (-> prev-game
+                      (move-cells size)
+                      (filter-collisions size)
+                      (handle-collisions))]
+    (assoc {} :names new-names)))
+
+(def game (atom {:game (gen-game SIZE)
                  :screen nil}))
 
 (defn reload!
@@ -80,9 +142,7 @@
   []
   (let [canvas (.getElementById js/document "game")
         ctx (gdom/getCanvasContext2D canvas)]
-    (draw-game! ctx (:screen game))))
-
-(lib/properties [:0 :A :A])
+    (draw-game! ctx @game)))
 
 (defn main!
   "Main function"
@@ -92,20 +152,16 @@
         window-height js/window.innerHeight
         canvas (new-canvas "game" window-width window-height)
         ctx (gdom/getCanvasContext2D canvas)
-        scr (gen-screen window-width window-height)]
+        scr (gen-screen window-width window-height SIZE)]
     (gdom/appendChild body canvas)
     (swap! game assoc :screen scr)
-    (set! (.-fillStyle ctx) "#AAAAAA")
-    (set! (.-strokeStyle ctx) "#FFFFFF")
     (gevents/listen js/window
                     "resize"
                     (fn []
                       (let [w js/window.innerWidth
                             h js/window.innerHeight
-                            scr (gen-screen w h)]
+                            scr (gen-screen w h SIZE)]
                         (resize-canvas! canvas w h)
                         (swap! game assoc :screen scr)
-                        (set! (.-fillStyle ctx) "#AAAAAA")
-                        (set! (.-strokeStyle ctx) "#FFFFFF")
-                        (draw-game! ctx (:screen @game)))))
-    (draw-game! ctx (:sreen @game))))
+                        (draw-game! ctx @game))))
+    (draw-game! ctx @game)))
