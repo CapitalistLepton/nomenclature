@@ -5,8 +5,6 @@
 
 (def SIZE 9)
 
-(defrecord Game [names])
-
 (defrecord Screen [rects])
 
 (defrecord Rect [x y w h])
@@ -41,7 +39,6 @@
     (do
       (.save ctx)
       (set! (.-fillStyle ctx) color)
-      (println (.-fillStyle ctx))
       (draw-rect! ctx rect)
       (.restore ctx))))
 
@@ -80,14 +77,11 @@
 (defn gen-game
   "Generates the game"
   [size]
-  (Game. (map (fn [x]
-                (if (and (or (= (quot x size) 5)
-                             (= (quot x size) 4))
-                         (not (= (mod x size) 4))
-                         (not (= (mod x size) 5)))
-                  [(lib/rand-letter) :A :A]
+  {:names (map (fn [x]
+                (if (= (quot x size) 5)
+                  [:4 :A :A]
                   nil))
-              (range 0 (* size size)))))
+              (range 0 (* size size)))})
 
 (defn move-cells
   "Moves the cells in the game. Returns a list of names and their indexes"
@@ -102,9 +96,7 @@
                          ni (+ (* ny size) nx)]
                      [ni name])
                    [i name]))
-               (-> prev-game
-                   (:game)
-                   (:names))))
+               prev-game))
 
 (defn filter-collisions
   "Group cells by their index. Collided cells will be in a list"
@@ -129,10 +121,11 @@
   "Returns a new game state based on the given state"
   [prev-game size]
   (let [new-names (-> prev-game
+                      (:names)
                       (move-cells size)
                       (filter-collisions size)
                       (handle-collisions))]
-    (assoc {} :names new-names)))
+    (assoc prev-game :names new-names)))
 
 (def game (atom {:game (gen-game SIZE)
                  :screen nil}))
@@ -164,4 +157,8 @@
                         (resize-canvas! canvas w h)
                         (swap! game assoc :screen scr)
                         (draw-game! ctx @game))))
-    (draw-game! ctx @game)))
+    (draw-game! ctx @game)
+    (js/setInterval (fn []
+                      (swap! game assoc :game (transition-game (:game @game) SIZE))
+                      (draw-game! ctx @game))
+                    1000)))
