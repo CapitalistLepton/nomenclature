@@ -83,17 +83,22 @@
                   nil))
               (range 0 (* size size)))})
 
+(defn move-index
+  "Calculate the next index from the current index, the move, and the widht/height of the grid"
+  [index [dx dy] size]
+  (let [x (mod index size)
+        y (quot index size)
+        nx (+ x dx)
+        ny (+ y dy)]
+    (mod (+ (* ny size) nx) (* size size))))
+
 (defn move-cells
   "Moves the cells in the game. Returns a list of names and their indexes"
   [prev-game size]
   (map-indexed (fn [i name]
                  (if (not (nil? name))
-                   (let [x (mod i size)
-                         y (quot i size)
-                         move (lib/movement name)
-                         nx (+ x (first move))
-                         ny (+ y (second move))
-                         ni (+ (* ny size) nx)]
+                   (let [move (lib/movement name)
+                         ni (move-index i move size)]
                      [ni name])
                    [i name]))
                prev-game))
