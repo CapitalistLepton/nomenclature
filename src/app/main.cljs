@@ -17,8 +17,6 @@
             [app.lib :as lib]
             [app.game :as game]))
 
-(def SIZE 9)
-
 (defrecord Screen [rects])
 
 (defrecord Rect [x y w h])
@@ -86,10 +84,50 @@
         horz-diff (- width total-w)
         offset-x (quot horz-diff 2)
         offset-y (quot vert-diff 2)]
-    (Screen. (gen-rects SIZE rect-w rect-h offset-x offset-y))))
+    (Screen. (gen-rects size rect-w rect-h offset-x offset-y))))
+
+(defn init-screen
+  "Creates the initial screen object"
+  [size]
+  (let [window-width js/window.innerWidth
+        window-height js/window.innerHeight]
+    (gen-screen window-width window-height size)))
+
+(defn init-canvas
+  "Creates the initial canvas based on the window measurements"
+  []
+  (let [body js/document.body
+        window-width js/window.innerWidth
+        window-height js/window.innerHeight
+        canvas (new-canvas "game" window-width window-height)
+        ctx (gdom/getCanvasContext2D canvas)]
+    (gdom/appendChild body canvas)
+    ctx))
+
+(def SIZE 9)
 
 (def state (atom {:game (game/gen-game SIZE)
                  :screen nil}))
+
+(defn handle-resize
+  "Resize the canvas as the window is resized"
+  []
+  (let [w js/window.innerWidth
+        h js/window.innerHeight
+        canvas (.getElementById js/document "game")
+        ctx (gdom/getCanvasContext2D canvas)
+        scr (gen-screen w h SIZE)]
+    (resize-canvas! canvas w h)
+    (swap! state assoc :screen scr)
+    (draw-game! ctx @state)))
+
+(defn game-loop
+  "Actions to perform in the game loop"
+  []
+  (let [canvas (.getElementById js/document "game")
+        ctx (gdom/getCanvasContext2D canvas)]
+    (swap! state assoc :game (game/transition-game (:game @state) SIZE))
+    (draw-game! ctx @state)))
 
 (defn reload!
   "Function that's called when the code is reloaded"
@@ -101,25 +139,8 @@
 (defn main!
   "Main function"
   []
-  (let [body js/document.body
-        window-width js/window.innerWidth
-        window-height js/window.innerHeight
-        canvas (new-canvas "game" window-width window-height)
-        ctx (gdom/getCanvasContext2D canvas)
-        scr (gen-screen window-width window-height SIZE)]
-    (gdom/appendChild body canvas)
-    (swap! state assoc :screen scr)
-    (gevents/listen js/window
-                    "resize"
-                    (fn []
-                      (let [w js/window.innerWidth
-                            h js/window.innerHeight
-                            scr (gen-screen w h SIZE)]
-                        (resize-canvas! canvas w h)
-                        (swap! state assoc :screen scr)
-                        (draw-game! ctx @state))))
+  (let [ctx (init-canvas)]
+    (swap! state assoc :screen (init-screen SIZE))
+    (gevents/listen js/window "resize" handle-resize)
     (draw-game! ctx @state)
-    (js/setInterval (fn []
-                      (swap! state assoc :game (game/transition-game (:game @state) SIZE))
-                      (draw-game! ctx @state))
-                    1000)))
+    (js/setInterval game-loop 1000)))
