@@ -1,11 +1,11 @@
 ;; Copyright 2021 Zane Littrell
-;; 
+;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
 ;; You may obtain a copy of the License at
-;; 
+;;
 ;;     http://www.apache.org/licenses/LICENSE-2.0
-;; 
+;;
 ;; Unless required by applicable law or agreed to in writing, software
 ;; distributed under the License is distributed on an "AS IS" BASIS,
 ;; WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,7 +14,8 @@
 (ns app.main
   (:require [goog.dom :as gdom]
             [goog.events :as gevents]
-            [app.lib :as lib]))
+            [app.lib :as lib]
+            [app.game :as game]))
 
 (def SIZE 9)
 
@@ -58,10 +59,10 @@
 (defn draw-game!
   "Draws the contents of the game"
   [ctx {:keys [game screen]}]
-  (doseq [[rect name] (map list (:rects screen) (:names game))]
-    (if (= name nil)
+  (doseq [[rect entity] (map list (:rects screen) game)]
+    (if (nil? entity)
       (color-rect! ctx rect "#FFFFFF")
-      (color-rect! ctx rect (lib/color name)))))
+      (color-rect! ctx rect (lib/color (:name entity))))))
 
 (defn gen-rects
   "Generates a list of size^2 rectangles with the given width and height"
@@ -87,65 +88,7 @@
         offset-y (quot vert-diff 2)]
     (Screen. (gen-rects SIZE rect-w rect-h offset-x offset-y))))
 
-(defn gen-game
-  "Generates the game"
-  [size]
-  {:names (map (fn [x]
-                (if (= (quot x size) 5)
-                  [:4 :A :A]
-                  nil))
-              (range 0 (* size size)))})
-
-(defn move-index
-  "Calculate the next index from the current index, the move, and the widht/height of the grid"
-  [index [dx dy] size]
-  (let [x (mod index size)
-        y (quot index size)
-        nx (+ x dx)
-        ny (+ y dy)]
-    (mod (+ (* ny size) nx) (* size size))))
-
-(defn move-cells
-  "Moves the cells in the game. Returns a list of names and their indexes"
-  [prev-game size]
-  (map-indexed (fn [i name]
-                 (if (not (nil? name))
-                   (let [move (lib/movement name)
-                         ni (move-index i move size)]
-                     [ni name])
-                   [i name]))
-               prev-game))
-
-(defn filter-collisions
-  "Group cells by their index. Collided cells will be in a list"
-  [indexed-cells size]
-  (reduce (fn [cell-map [i cell]]
-            (if (not (nil? cell))
-              (assoc cell-map i (cons cell (get cell-map i)))
-              cell-map))
-          (vec (repeat (* size size) '()))
-          indexed-cells))
-
-(defn handle-collisions
-  "Handle cells that have collided. Return list of all cells, nil where there are no names."
-  [cells]
-  (map (fn [cell-list]
-         (if (= cell-list '())
-           nil
-           (first cell-list))) ; TODO replace with actual collision logic
-       cells))
-
-(defn transition-game
-  "Returns a new game state based on the given state"
-  [prev-game size]
-  (let [new-names (-> prev-game
-                      (:names)
-                      (move-cells size)
-                      (filter-collisions size)
-                      (handle-collisions))]
-    (assoc prev-game :names new-names)))
-
-(def game (atom {:game (gen-game SIZE)
+(def state (atom {:game (game/gen-game SIZE)
                  :screen nil}))
 
 (defn reload!
@@ -153,7 +96,7 @@
   []
   (let [canvas (.getElementById js/document "game")
         ctx (gdom/getCanvasContext2D canvas)]
-    (draw-game! ctx @game)))
+    (draw-game! ctx @state)))
 
 (defn main!
   "Main function"
@@ -165,7 +108,7 @@
         ctx (gdom/getCanvasContext2D canvas)
         scr (gen-screen window-width window-height SIZE)]
     (gdom/appendChild body canvas)
-    (swap! game assoc :screen scr)
+    (swap! state assoc :screen scr)
     (gevents/listen js/window
                     "resize"
                     (fn []
@@ -173,10 +116,10 @@
                             h js/window.innerHeight
                             scr (gen-screen w h SIZE)]
                         (resize-canvas! canvas w h)
-                        (swap! game assoc :screen scr)
-                        (draw-game! ctx @game))))
-    (draw-game! ctx @game)
+                        (swap! state assoc :screen scr)
+                        (draw-game! ctx @state))))
+    (draw-game! ctx @state)
     (js/setInterval (fn []
-                      (swap! game assoc :game (transition-game (:game @game) SIZE))
-                      (draw-game! ctx @game))
+                      (swap! state assoc :game (game/transition-game (:game @state) SIZE))
+                      (draw-game! ctx @state))
                     1000)))
