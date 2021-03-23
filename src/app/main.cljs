@@ -156,8 +156,10 @@
     (swap! state assoc :screen (init-screen SIZE))
     (gevents/listen js/window "resize" handle-resize)
     (let [name1 (prompt-user "Enter name (Player 1)" #"^[0-9ab]{3}$")
-          name2 (prompt-user "Enter name (Player 2)" #"^[0-9ab]{3}$")]
-      (println name1 ":" name2))
-    )
+          parsed-name1 (lib/parse-name name1)
+          name2 (prompt-user "Enter name (Player 2)" #"^[0-9ab]{3}$")
+          parsed-name2 (lib/parse-name name2)]
+      (println parsed-name1 ":" parsed-name2))
+    ))
     ;(draw-game! ctx @state)
     ;(js/setInterval game-loop 1000)))
