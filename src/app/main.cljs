@@ -31,6 +31,42 @@
     (gdom/setProperties canvas properties)
     canvas))
 
+(defn new-text
+  "Creates a new text element"
+  [id body]
+  (let [p (gdom/createElement "p")
+        properties #js{"id" id
+                       "innerHTML" body}]
+    (gdom/setProperties p properties)
+    p))
+
+(defn new-input
+  "Creates a new text input field"
+  [id]
+  (let [input (gdom/createElement "input")
+        properties #js{"id" id}]
+    (gdom/setProperties input properties)
+    input))
+
+(defn new-button
+  "Creates a new button"
+  [id text]
+  (let [button (gdom/createElement "button")
+        properties #js{"id" id
+                       "innerHTML" text}]
+    (gdom/setProperties button properties)
+    button))
+
+(defn new-div
+  "Creates a new div container"
+  [id margin-left margin-top]
+  (let [div (gdom/createElement "div")
+        style (str "margin-top: " margin-top "; margin-left: " margin-left)
+        properties #js{"id" id
+                       "style" style}]
+    (gdom/setProperties div properties)
+    div))
+
 (defn resize-canvas!
   "Resizes the canvas to fit the screen"
   [canvas width height]
@@ -104,6 +140,24 @@
     (gdom/appendChild body canvas)
     ctx))
 
+(defn prompt-user
+  [prompt click-handler]
+  (let [body js/document.body
+        container (new-div "prompt-container" "40%" "10%")
+        prompt-text (new-text "prompt-text" prompt)
+        input (new-input "prompt-input")
+        submit (new-button "prompt-submit" "Enter")]
+    (gdom/appendChild body container)
+    (gdom/appendChild container prompt-text)
+    (gdom/appendChild container input)
+    (gevents/listen submit "click" click-handler)
+    (gdom/appendChild container submit)))
+
+(defn clear-body
+  []
+  (let [body js/document.body]
+    (gdom/removeChildren body)))
+
 (def SIZE 9)
 
 (def state (atom {:game (game/gen-game SIZE)
@@ -139,8 +193,13 @@
 (defn main!
   "Main function"
   []
-  (let [ctx (init-canvas)]
+  ;(let [ctx (init-canvas)]
+    (clear-body)
     (swap! state assoc :screen (init-screen SIZE))
     (gevents/listen js/window "resize" handle-resize)
-    (draw-game! ctx @state)
-    (js/setInterval game-loop 1000)))
+    (let [name1 (js/prompt "Enter name (Player 1)" "")
+          name2 (js/prompt "Enter name (Player 2)" "")]
+      (println name1 ":" name2))
+    )
+    ;(draw-game! ctx @state)
+    ;(js/setInterval game-loop 1000)))
