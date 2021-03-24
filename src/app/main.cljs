@@ -101,6 +101,7 @@
         window-height js/window.innerHeight
         canvas (new-canvas "game" window-width window-height)
         ctx (gdom/getCanvasContext2D canvas)]
+    (println "Create canvas " canvas)
     (gdom/appendChild body canvas)
     ctx))
 
@@ -118,7 +119,7 @@
 
 (def SIZE 9)
 
-(def state (atom {:game (game/gen-game SIZE)
+(def state (atom {:game nil
                  :screen nil}))
 
 (defn handle-resize
@@ -137,9 +138,14 @@
   "Actions to perform in the game loop"
   []
   (let [canvas (.getElementById js/document "game")
-        ctx (gdom/getCanvasContext2D canvas)]
-    (swap! state assoc :game (game/transition-game (:game @state) SIZE))
-    (draw-game! ctx @state)))
+        ctx (if (not (nil? canvas))
+              (gdom/getCanvasContext2D canvas)
+              nil)]
+    (if (nil? ctx)
+      (println "Canvas is null")
+      (do
+        (swap! state assoc :game (game/transition-game (:game @state) SIZE))
+        (draw-game! ctx @state)))))
 
 (defn reload!
   "Function that's called when the code is reloaded"
@@ -152,14 +158,13 @@
   "Main function"
   []
   (let [ctx (init-canvas)]
-    (clear-body)
     (swap! state assoc :screen (init-screen SIZE))
     (gevents/listen js/window "resize" handle-resize)
     (let [name1 (prompt-user "Enter name (Player 1)" #"^[0-9ab]{3}$")
           parsed-name1 (lib/parse-name name1)
           name2 (prompt-user "Enter name (Player 2)" #"^[0-9ab]{3}$")
           parsed-name2 (lib/parse-name name2)]
-      (println parsed-name1 ":" parsed-name2))
-    ))
-    ;(draw-game! ctx @state)
-    ;(js/setInterval game-loop 1000)))
+      (println parsed-name1 ":" parsed-name2)
+      (swap! state assoc :game (game/gen-game SIZE parsed-name1 parsed-name2))
+      (draw-game! ctx @state)
+      (js/setInterval game-loop 1000))))

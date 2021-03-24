@@ -16,21 +16,39 @@
 
 (defn gen-game
   "Generates the game"
-  [size]
+  [size name1 name2]
   (map (fn [x]
          (if (< (quot x size) 2)
-           (cells/make-entity [:A :A :A] :player1 :clay)
+           (cells/make-entity name1 :player1 :clay)
            (if (> (quot x size) 7)
-             (cells/make-entity [:A :A :A] :player2 :clay)
+             (cells/make-entity name2 :player2 :clay)
              nil)))
        (range 0 (* size size))))
 
-(gen-game 9)
+(defn count-entities
+  "Count all entities in the game"
+  [game]
+  (reduce (fn [acc el]
+            (case (:owner el)
+              :player1 (update acc :player1 inc)
+              :player2 (update acc :player2 inc)
+              acc))
+          {:player1 0
+           :player2 0}
+          game))
 
 (defn transition-game
   "Returns a new game state based on the given state"
   [prev-game size]
-  (-> prev-game
-      (cells/move-cells size)
-      (cells/filter-collisions size)
-      (cells/handle-collisions)))
+  (let [next-game (-> prev-game
+                      (cells/move-cells size)
+                      (cells/filter-collisions size)
+                      (cells/handle-collisions))
+        count-entities (count-entities next-game)]
+    (println count-entities)
+    (if (or (= (:player1 count-entities) 0)
+            (= (:player2 count-entities) 0))
+      (if (= (:player1 count-entities) 0)
+        next-game ; Player 2 won
+        next-game) ; Player 1 won
+      next-game)))

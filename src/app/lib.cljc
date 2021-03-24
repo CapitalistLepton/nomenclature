@@ -47,7 +47,7 @@
 (defn color
   "Returns the color of the name"
   [name]
-  (case (get name 0)
+  (case (nth name 0)
     :0 "#800000"
     :1 "#008000"
     :2 "#808000"
@@ -64,7 +64,7 @@
 (defn speed
   "Returns the speed stat of the name"
   [name]
-  (case (get name 1)
+  (case (nth name 1)
     (:0 :1 :2 :3) 0.25
     (:4 :5 :6 :7) 0.5
     (:8 :9 :A :B) 0.75))
@@ -73,16 +73,16 @@
   "Returns the strength stat of the name"
   [name]
   (-> irrationals
-      (get (get letters (get name 0)))
-      (get (get letters (get name 2)))
+      (get (get letters (nth name 0)))
+      (get (get letters (nth name 2)))
       (int)))
 
 (defn health
   "Returns the health stat of the name"
   [name]
   (-> irrationals
-      (get (get letters (get name 0)))
-      (get (get letters (get name 1)))
+      (get (get letters (nth name 0)))
+      (get (get letters (nth name 1)))
       (int)))
 
 (defn properties
@@ -96,7 +96,7 @@
 (defn movement
   "Returns the next move of the name"
   [name]
-  (case (get name 0)
+  (case (nth name 0)
     :0 [ 0  1]
     :1 [ 0 -1]
     :2 [ 1  0]
