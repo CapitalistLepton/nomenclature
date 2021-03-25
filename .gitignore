@@ -2,3 +2,4 @@
 node_modules/
 target/
 .lsp/
+shadow-cljs.edn
