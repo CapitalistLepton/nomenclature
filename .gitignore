@@ -1,5 +1,7 @@
 .shadow-cljs/
 node_modules/
+!target/index.html
 target/
 .lsp/
 shadow-cljs.edn
+package.json
