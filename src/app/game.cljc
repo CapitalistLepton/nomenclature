@@ -43,12 +43,5 @@
   (let [next-game (-> prev-game
                       (cells/move-cells size)
                       (cells/filter-collisions size)
-                      (cells/handle-collisions))
-        count-entities (count-entities next-game)]
-    (println count-entities)
-    (if (or (= (:player1 count-entities) 0)
-            (= (:player2 count-entities) 0))
-      (if (= (:player1 count-entities) 0)
-        next-game ; Player 2 won
-        next-game) ; Player 1 won
-      next-game)))
+                      (cells/handle-collisions))]
+    next-game))

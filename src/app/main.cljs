@@ -145,7 +145,14 @@
       (println "Canvas is null")
       (do
         (swap! state assoc :game (game/transition-game (:game @state) SIZE))
-        (draw-game! ctx @state)))))
+        (let [counts (game/count-entities (:game @state))]
+          (draw-game! ctx @state)
+          (if (or (= (:player1 counts) 0)
+                  (= (:player2 counts) 0))
+            (if (= (:player1 counts) 0)
+              (js/alert "Player 2 won")
+              (js/alert "Player 1 won"))
+            nil)))))) ; No winners yet
 
 (defn reload!
   "Function that's called when the code is reloaded"
