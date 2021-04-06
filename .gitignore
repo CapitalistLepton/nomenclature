@@ -3,5 +3,6 @@ node_modules/
 !target/index.html
 target/
 .lsp/
+.lein-failures
 shadow-cljs.edn
 package.json
