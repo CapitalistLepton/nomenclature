@@ -59,7 +59,7 @@
     :8 "#ff0000"
     :9 "#00ff00"
     :A "#ffff00"
-    :B "#0000ff"))
+    :B "#0000ff")) ; Error on no match
 
 (defn speed
   "Returns the speed stat of the name"
@@ -69,20 +69,37 @@
     (:4 :5 :6 :7) 0.5
     (:8 :9 :A :B) 0.75))
 
+(defn parse-keyword
+  "Parse the integer value of the given keyword"
+  [sym]
+  (case sym
+    :0 0
+    :1 1
+    :2 2
+    :3 3
+    :4 4
+    :5 5
+    :6 6
+    :7 7
+    :8 8
+    :9 9
+    :A 10
+    :B 11))
+
 (defn strength
   "Returns the strength stat of the name"
   [name]
   (-> irrationals
-      (get (get letters (nth name 0)))
-      (get (get letters (nth name 2)))
+      (get (parse-keyword (nth name 0)))
+      (get (parse-keyword (nth name 2)))
       (int)))
 
 (defn health
   "Returns the health stat of the name"
   [name]
   (-> irrationals
-      (get (get letters (nth name 0)))
-      (get (get letters (nth name 1)))
+      (get (parse-keyword (nth name 0)))
+      (get (parse-keyword (nth name 1)))
       (int)))
 
 (defn properties
