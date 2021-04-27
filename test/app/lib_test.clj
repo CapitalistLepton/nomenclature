@@ -114,4 +114,101 @@
 (deftest strength-test
   (testing "Strength for :0 .. :0"
     (is (= 1 (lib/strength [:0 nil :0]))))
-  )
+  (testing "Strength of nil"
+    (let [exception (atom false)]
+      (try
+        (lib/strength [nil nil nil])
+        (catch IllegalArgumentException _ (compare-and-set! exception false true)))
+    (is (= true @exception)))))
+
+(deftest health-test
+  (testing "Health for :0 :0 .."
+    (is (= 1 (lib/health [:0 :0 nil]))))
+  (testing "Health of nil"
+    (let [exception (atom false)]
+      (try
+        (lib/health [nil nil nil])
+        (catch IllegalArgumentException _ (compare-and-set! exception false true)))
+    (is (= true @exception)))))
+
+(deftest properties-test
+  (testing "Properties for :0 :0 :0"
+    (let [expected {:color "#800000"
+                    :speed 0.25
+                    :strength 1
+                    :health 1}]
+      (is (= expected (lib/properties[:0 :0 :0])))))
+  (testing "Properties of nil"
+    (let [exception (atom false)]
+      (try
+        (lib/properties [nil nil nil])
+        (catch IllegalArgumentException _ (compare-and-set! exception false true)))
+    (is (= true @exception)))))
+
+(deftest movement-test
+  (testing "Movement of :0"
+    (is (= [0 1] (lib/movement [:0 nil nil]))))
+  (testing "Movement of :1"
+    (is (= [0 -1] (lib/movement [:1 nil nil]))))
+  (testing "Movement of :2"
+    (is (= [1 0] (lib/movement [:2 nil nil]))))
+  (testing "Movement of :3"
+    (is (= [-1 0] (lib/movement [:3 nil nil]))))
+  (testing "Movement of :4"
+    (is (= [1 1] (lib/movement [:4 nil nil]))))
+  (testing "Movement of :5"
+    (is (= [1 -1] (lib/movement [:5 nil nil]))))
+  (testing "Movement of :6"
+    (is (= [-1 1] (lib/movement [:6 nil nil]))))
+  (testing "Movement of :7"
+    (is (= [-1 -1] (lib/movement [:7 nil nil]))))
+  (testing "Movement of :8"
+    (is (= [0 1] (lib/movement [:8 nil nil]))))
+  (testing "Movement of :9"
+    (is (= [0 -1] (lib/movement [:9 nil nil]))))
+  (testing "Movement of :A"
+    (is (= [1 0] (lib/movement [:A nil nil]))))
+  (testing "Movement of :B"
+    (is (= [-1 0] (lib/movement [:B nil nil]))))
+  (testing "Movement of nil"
+    (let [exception (atom false)]
+      (try
+        (lib/movement nil)
+        (catch IllegalArgumentException _ (compare-and-set! exception false true)))
+    (is (= true @exception)))))
+
+(deftest parse-letter
+  (testing "Letter of 0"
+    (is (= :0 (lib/parse-letter \0))))
+  (testing "Letter of 1"
+    (is (= :1 (lib/parse-letter \1))))
+  (testing "Letter of 2"
+    (is (= :2 (lib/parse-letter \2))))
+  (testing "Letter of 3"
+    (is (= :3 (lib/parse-letter \3))))
+  (testing "Letter of 4"
+    (is (= :4 (lib/parse-letter \4))))
+  (testing "Letter of 5"
+    (is (= :5 (lib/parse-letter \5))))
+  (testing "Letter of 6"
+    (is (= :6 (lib/parse-letter \6))))
+  (testing "Letter of 7"
+    (is (= :7 (lib/parse-letter \7))))
+  (testing "Letter of 8"
+    (is (= :8 (lib/parse-letter \8))))
+  (testing "Letter of 9"
+    (is (= :9 (lib/parse-letter \9))))
+  (testing "Letter of a"
+    (is (= :A (lib/parse-letter \a))))
+  (testing "Letter of b"
+    (is (= :B (lib/parse-letter \b))))
+  (testing "Letter of nil"
+    (let [exception (atom false)]
+      (try
+        (lib/parse-letter nil)
+        (catch IllegalArgumentException _ (compare-and-set! exception false true)))
+    (is (= true @exception)))))
+
+(deftest parse-name
+  (testing "Name of \"8ab\""
+    (is (= [:8 :A :B] (lib/parse-name "8ab")))))

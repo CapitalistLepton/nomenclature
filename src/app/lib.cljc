@@ -129,11 +129,6 @@
     :A [ 1  0]
     :B [-1  0]))
 
-(defn rand-letter
-  "Gets a random letter from the possible letters"
-  []
-  (rand-nth letters))
-
 (defn parse-letter
   "Parses the letter symbol from the char"
   [ch]
@@ -152,5 +147,6 @@
     \b :B))
 
 (defn parse-name
+  "Parse letters from string"
   [name-str]
   (map (comp parse-letter char) name-str))
