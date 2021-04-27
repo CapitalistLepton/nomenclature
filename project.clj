@@ -9,6 +9,7 @@
                  [cider/cider-nrepl "0.24.0"]]
   :plugins [[lein-shadow "0.3.1"]
             [lein-cloverage "1.2.2"]]
+  :cloverage {:ns-exclude-regex [#"app(\.stats)"]} ; Don't need to test stats file since it won't be used functionally
   :shadow-cljs {:source-paths ["src"]
                 :dev-http {8080 "target/"}
                 :builds {:app {:output-dir "target/"

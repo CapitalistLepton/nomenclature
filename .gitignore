@@ -4,5 +4,7 @@ node_modules/
 target/
 .lsp/
 .lein-failures
+.lein-repl-history
+.nrepl-port
 shadow-cljs.edn
 package.json

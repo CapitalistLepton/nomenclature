@@ -92,7 +92,8 @@
   (-> irrationals
       (get (parse-keyword (nth name 0)))
       (get (parse-keyword (nth name 2)))
-      (int)))
+      (int)
+      (- 48))) ; ASCII 0 => 48
 
 (defn health
   "Returns the health stat of the name"
@@ -100,7 +101,8 @@
   (-> irrationals
       (get (parse-keyword (nth name 0)))
       (get (parse-keyword (nth name 1)))
-      (int)))
+      (int)
+      (- 48))) ; ASCII 0 => 48
 
 (defn properties
   "Returns a map of the properties of the name"
