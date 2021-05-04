@@ -14,6 +14,7 @@
 (ns app.main
   (:require [goog.dom :as gdom]
             [goog.events :as gevents]
+            [reagent.dom :as rdom]
             [app.lib :as lib]
             [app.game :as game]
             [app.name-picker :as name-picker]))
@@ -165,7 +166,9 @@
 (defn main!
   "Main function"
   []
-  (name-picker/draw-name-picker))
+  (rdom/render
+    [name-picker/draw-name-picker]
+    (.-body js/document)))
   ; (let [ctx (init-canvas)]
   ;   (swap! state assoc :screen (init-screen SIZE))
   ;   (gevents/listen js/window "resize" handle-resize)
