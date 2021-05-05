@@ -163,12 +163,26 @@
 ;        ctx (gdom/getCanvasContext2D canvas)]
 ;    (draw-game! ctx @state)))
 
+(defn draw-page
+  [page-cmp]
+  (rdom/render
+    [page-cmp]
+    (.getElementById js/document "container")))
+
+(defn home-page
+  []
+  [:div
+   [:h1 "Home Page"]
+   [:ul
+    [:li
+     [:button {:on-click #(draw-page (partial name-picker/draw-name-picker
+                                              (fn [] (draw-page home-page))))}
+      "Name Picker"]]]])
+
 (defn main!
   "Main function"
   []
-  (rdom/render
-    [name-picker/draw-name-picker]
-    (.-body js/document)))
+  (draw-page home-page))
   ; (let [ctx (init-canvas)]
   ;   (swap! state assoc :screen (init-screen SIZE))
   ;   (gevents/listen js/window "resize" handle-resize)
