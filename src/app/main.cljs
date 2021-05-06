@@ -17,7 +17,8 @@
             [reagent.dom :as rdom]
             [app.lib :as lib]
             [app.game :as game]
-            [app.name-picker :as name-picker]))
+            [app.name-picker :as name-picker]
+            [app.board :as board]))
 
 ;(defrecord Screen [rects])
 ;
@@ -33,11 +34,6 @@
 ;    (gdom/setProperties canvas properties)
 ;    canvas))
 ;
-;(defn resize-canvas!
-;  "Resizes the canvas to fit the screen"
-;  [canvas width height]
-;  (gdom/setProperties canvas #js{"width"  width
-;                                 "height" height}))
 ;
 ;(defn draw-rect!
 ;  "Draws a rectangle on the given context"
@@ -177,7 +173,12 @@
     [:li
      [:button {:on-click #(draw-page (partial name-picker/draw-name-picker
                                               (fn [] (draw-page home-page))))}
-      "Name Picker"]]]])
+      "Name Picker"]]
+    [:li
+     [:button {:on-click #(rdom/render [:canvas {:id "board"}]
+                                       (.getElementById js/document "container")
+                                       board/board-init-hook)}
+      "Play"]]]])
 
 (defn main!
   "Main function"
