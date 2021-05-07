@@ -89,20 +89,28 @@
 (defn strength
   "Returns the strength stat of the name"
   [name]
-  (-> irrationals
-      (get (parse-keyword (nth name 0)))
-      (get (parse-keyword (nth name 2)))
-      (int)
-      (- 48))) ; ASCII 0 => 48
+  #?(:clj (-> irrationals
+              (get (parse-keyword (nth name 0)))
+              (get (parse-keyword (nth name 2)))
+              (int)
+              (- 48)) ; ASCII 0 => 48
+     :cljs (-> irrationals
+              (get (parse-keyword (nth name 0)))
+              (get (parse-keyword (nth name 2)))
+              (int)))) ; No ASCII conversion for cljs
 
 (defn health
   "Returns the health stat of the name"
   [name]
-  (-> irrationals
-      (get (parse-keyword (nth name 0)))
-      (get (parse-keyword (nth name 1)))
-      (int)
-      (- 48))) ; ASCII 0 => 48
+  #?(:clj (-> irrationals
+              (get (parse-keyword (nth name 0)))
+              (get (parse-keyword (nth name 1)))
+              (int)
+              (- 48)) ; ASCII 0 => 48
+     :cljs (-> irrationals
+              (get (parse-keyword (nth name 0)))
+              (get (parse-keyword (nth name 1)))
+              (int)))) ; No ASCII conversion for cljs
 
 (defn properties
   "Returns a map of the properties of the name"

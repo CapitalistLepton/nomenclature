@@ -5,7 +5,7 @@
   :profiles {:uberjar {:aot :all}}
   :dependencies [[org.clojure/clojure "1.10.1"]
                  [thheller/shadow-cljs "2.11.25"]
-                 ;[lein-shadow "0.3.1"]
+                 [reagent "1.0.0"]
                  [cider/cider-nrepl "0.24.0"]]
   :plugins [[lein-shadow "0.3.1"]
             [lein-cloverage "1.2.2"]]
