@@ -14,6 +14,7 @@
 (ns app.main
   (:require [reagent.dom :as rdom]
             [app.name-picker :as name-picker]
+            [app.rng :as rng]
             [app.board :as board]))
 
 (defn draw-page
@@ -46,4 +47,16 @@
 (defn main!
   "Main function"
   []
-  (draw-page home-page))
+  (let [prng (rng/gen-random 1234)]
+    (while (> @prng 0)
+      (println (rng/next! prng))
+      (println (rng/to-double @prng))
+    )))
+    ;(println (rng/next! prng))
+    ;(println (rng/to-double @prng))
+    ;(println (rng/next! prng))
+    ;(println (rng/to-double @prng))
+    ;(println @prng)
+    ;))
+    ;(println (rng/to-double @(rng/next! prng)))
+    ;(draw-page home-page)))
