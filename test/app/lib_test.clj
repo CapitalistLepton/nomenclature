@@ -13,6 +13,7 @@
 ;; limitations under the License.
 (ns app.lib-test
   (:require [clojure.test :refer [deftest is testing]]
+            [xoroshiro128.core :as rng]
             [app.lib :as lib]))
 
 (deftest color-test
@@ -177,7 +178,7 @@
         (catch IllegalArgumentException _ (compare-and-set! exception false true)))
     (is (= true @exception)))))
 
-(deftest parse-letter
+(deftest parse-letter-test
   (testing "Letter of 0"
     (is (= :0 (lib/parse-letter \0))))
   (testing "Letter of 1"
@@ -209,6 +210,36 @@
         (catch IllegalArgumentException _ (compare-and-set! exception false true)))
     (is (= true @exception)))))
 
-(deftest parse-name
+(deftest parse-name-test
   (testing "Name of \"8ab\""
     (is (= [:8 :A :B] (lib/parse-name "8ab")))))
+
+(deftest init-rng-test
+  (testing "Creates an atom with the specified seed"
+    (let [seed 1231244
+          expected (rng/xoroshiro128+ seed)
+          actual (lib/init-rng seed)]
+      (is (= (rng/value expected) (rng/value @actual))))))
+
+(deftest next-rng-test
+  (testing "Updates the atom to the next value in the PRNG"
+    (let [prng (lib/init-rng 1231231)
+          expected (rng/next @prng)
+          actual (lib/next-rng prng)]
+      (is (and (= (rng/value expected) (rng/value actual))
+               (= (rng/value expected) (rng/value @prng)))))))
+
+(deftest get-double-test
+  (testing "Gets the double value of the PRNG atom"
+    (let [prng (lib/init-rng 1231231)
+          expected (rng/long->unit-float (rng/value @prng))
+          actual (lib/get-double prng)]
+      (is (= expected actual)))))
+
+(deftest random-letter-test
+  (testing "Gets a random letter based off of the PRNG atom"
+    (let [prng (lib/init-rng 1231231)
+          expected-double (rng/long->unit-float (rng/value (rng/next @prng)))
+          expected (nth lib/letters (* expected-double (count lib/letters)))
+          actual (lib/random-letter prng)]
+      (is (= expected actual)))))
