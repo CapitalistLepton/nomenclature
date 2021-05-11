@@ -11,7 +11,8 @@
 ;; WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
-(ns app.lib)
+(ns app.lib
+  (:require [xoroshiro128.core :as rng]))
 
 (def letters
   "List of all the possible lettters"
@@ -158,3 +159,26 @@
   "Parse letters from string"
   [name-str]
   (map (comp parse-letter char) name-str))
+
+(defn init-rng
+  "Creates a new atom containing the xoroshiro128+ PRNG"
+  [seed]
+  (atom (rng/xoroshiro128+ seed)))
+
+(defn next-rng
+  "Update the atom to have the next random value"
+  [prng-atom]
+  (swap! prng-atom rng/next))
+
+(defn get-double
+  "Get the current value of the atom as a double in [0,1)"
+  [prng-atom]
+  (rng/long->unit-float (rng/value @prng-atom)))
+
+(defn random-letter
+  "Return one of the letters at random"
+  [prng-atom]
+  (next-rng prng-atom)
+  (let [x (get-double prng-atom)
+        rand-index (* x (count letters))]
+    (nth letters rand-index)))

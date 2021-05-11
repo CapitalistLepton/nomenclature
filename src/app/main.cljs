@@ -13,9 +13,13 @@
 ;; limitations under the License.
 (ns app.main
   (:require [reagent.dom :as rdom]
+            [app.lib :as lib]
             [app.name-picker :as name-picker]
-            [app.rng :as rng]
             [app.board :as board]))
+
+(defonce seed 123456789)
+
+(defonce prng (lib/init-rng seed))
 
 (defn draw-page
   "Draw the given page inside the main container"
@@ -47,16 +51,14 @@
 (defn main!
   "Main function"
   []
-  (let [prng (rng/gen-random 1234)]
-    (while (> @prng 0)
-      (println (rng/next! prng))
-      (println (rng/to-double @prng))
-    )))
-    ;(println (rng/next! prng))
-    ;(println (rng/to-double @prng))
-    ;(println (rng/next! prng))
-    ;(println (rng/to-double @prng))
-    ;(println @prng)
-    ;))
-    ;(println (rng/to-double @(rng/next! prng)))
+    (do
+      (lib/next-rng prng)
+      (println (lib/get-double prng)))
+    (do
+      (lib/next-rng prng)
+      (println "Test 2 " (lib/get-double prng)))
+    (println
+      (for [i (range 10)]
+        (str "Letter " i " " (lib/random-letter prng))))
+    )
     ;(draw-page home-page)))
