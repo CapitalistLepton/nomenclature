@@ -182,3 +182,9 @@
   (let [x (get-double prng-atom)
         rand-index (* x (count letters))]
     (nth letters rand-index)))
+
+(defn remove-letter
+  "Removes one of given letter from letters"
+  [letters letter]
+  (let [[remaining-letters list-of-letter] (split-with (partial not= letter) letters)]
+    (concat remaining-letters (rest list-of-letter))))

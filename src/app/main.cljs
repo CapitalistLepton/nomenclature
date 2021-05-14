@@ -35,7 +35,8 @@
    [:ul
     [:li
      [:button {:on-click #(draw-page (partial name-picker/draw-name-picker
-                                              (fn [] (draw-page home-page))))}
+                                              (fn [] (draw-page home-page))
+                                              (take 7 (repeatedly (partial lib/random-letter prng)))))}
       "Name Picker"]]
     [:li
      [:button {:on-click #(rdom/render [:canvas {:id "board"}]
@@ -51,14 +52,14 @@
 (defn main!
   "Main function"
   []
-    (do
-      (lib/next-rng prng)
-      (println (lib/get-double prng)))
-    (do
-      (lib/next-rng prng)
-      (println "Test 2 " (lib/get-double prng)))
-    (println
-      (for [i (range 10)]
-        (str "Letter " i " " (lib/random-letter prng))))
-    )
-    ;(draw-page home-page)))
+    ;(do
+    ;  (lib/next-rng prng)
+    ;  (println (lib/get-double prng)))
+    ;(do
+    ;  (lib/next-rng prng)
+    ;  (println "Test 2 " (lib/get-double prng)))
+    ;(println
+    ;  (for [i (range 10)]
+    ;    (str "Letter " i " " (lib/random-letter prng))))
+    ;)
+    (draw-page home-page))

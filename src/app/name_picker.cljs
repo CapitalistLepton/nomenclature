@@ -18,21 +18,23 @@
 (defonce name-picked (r/atom []))
 
 (defn letter-elem
-  [letter name-ref]
+  [letter name-ref letters]
   [:li
    [:button
     {:on-click (fn []
                  (when (< (count @name-ref) 3)
-                   (swap! name-ref conj letter))
+                   (swap! name-ref (fn [old-ref]
+                                     (swap! letters lib/remove-letter letter)
+                                     (conj old-ref letter))))
                  (println @name-ref))}
     letter]])
 
 (defn letters-list
   "Makes list of letters"
-  [name-ref]
+  [name-ref letters]
   [:ul {:id "letters"}
-   (for [letter lib/letters]
-     ^{:key letter} [letter-elem letter name-ref])
+   (for [letter letters]
+     ^{:key letter} [letter-elem letter name-ref letters])
    [:li
     [:button {:on-click (fn []
                      (when (> (count @name-ref) 0)
@@ -55,10 +57,11 @@
 
 (defn draw-name-picker
   "Draw list of names"
-  [home-fn]
-  [:div
-   [:button {:on-click home-fn}
-    "Back"]
-   [:p "Name: " (str @name-picked)]
-   [letters-list name-picked]
-   [name-properties @name-picked]])
+  [home-fn possible-letters]
+  (let [letters (atom possible-letters)]
+    [:div
+     [:button {:on-click home-fn}
+      "Back"]
+     [name-properties @name-picked]
+     [:p "Name: " (str @name-picked)]
+     [letters-list name-picked letters]]))
