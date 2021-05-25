@@ -15,31 +15,32 @@
   (:require [app.lib :as lib]
             [reagent.core :as r]))
 
-(defonce name-picked (r/atom []))
+(defonce state (r/atom []))
 
 (defn letter-elem
-  [letter name-ref letters]
+  "Display a letter as a button which adds the letter to the name when pressed"
+  [letter state]
   [:li
    [:button
     {:on-click (fn []
-                 (when (< (count @name-ref) 3)
-                   (swap! name-ref (fn [old-ref]
-                                     (swap! letters lib/remove-letter letter)
-                                     (conj old-ref letter))))
-                 (println @name-ref))}
+                 (when (< (count @state) 3)
+                   (swap! state conj letter))
+                 (println @state))}
     letter]])
 
 (defn letters-list
   "Makes list of letters"
-  [name-ref letters]
+  [letters state]
   [:ul {:id "letters"}
-   (for [letter letters]
-     ^{:key letter} [letter-elem letter name-ref letters])
+   (map-indexed (fn [i letter]
+                  ^{:key (str letter "-" i)} [letter-elem letter state])
+                letters)
    [:li
     [:button {:on-click (fn []
-                     (when (> (count @name-ref) 0)
-                       (swap! name-ref pop))
-                     (println @name-ref))}
+                          (when (> (count @state) 0)
+                            (swap! state (fn [old-state]
+                                           (pop old-state))))
+                          (println @state))}
      "Delete"]]])
 
 (defn name-properties
@@ -58,10 +59,15 @@
 (defn draw-name-picker
   "Draw list of names"
   [home-fn possible-letters]
-  (let [letters (atom possible-letters)]
+  (println possible-letters)
+  (let [letters (reduce (fn [letters letter]
+                          (lib/remove-letter letters letter))
+                        possible-letters
+                        @state)]
+    (println letters)
     [:div
      [:button {:on-click home-fn}
       "Back"]
-     [name-properties @name-picked]
-     [:p "Name: " (str @name-picked)]
-     [letters-list name-picked letters]]))
+     [name-properties @state]
+     [:p "Name: " (str @state)]
+     [letters-list letters state]]))
