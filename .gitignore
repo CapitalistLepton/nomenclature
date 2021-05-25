@@ -8,3 +8,4 @@ target/
 .nrepl-port
 shadow-cljs.edn
 package.json
+package-lock.json

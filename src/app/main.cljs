@@ -39,9 +39,8 @@
                                               (take 7 (repeatedly (partial lib/random-letter prng)))))}
       "Name Picker"]]
     [:li
-     [:button {:on-click #(rdom/render [:canvas {:id "board"}]
-                                       (.getElementById js/document "container")
-                                       board/board-init-hook)}
+     [:button {:on-click #(draw-page (partial board/draw-board
+                                              (fn [] (draw-page home-page))))}
       "Play"]]]])
 
 (defn reload!
