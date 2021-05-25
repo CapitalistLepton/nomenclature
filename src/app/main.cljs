@@ -52,14 +52,4 @@
 (defn main!
   "Main function"
   []
-    ;(do
-    ;  (lib/next-rng prng)
-    ;  (println (lib/get-double prng)))
-    ;(do
-    ;  (lib/next-rng prng)
-    ;  (println "Test 2 " (lib/get-double prng)))
-    ;(println
-    ;  (for [i (range 10)]
-    ;    (str "Letter " i " " (lib/random-letter prng))))
-    ;)
-    (draw-page home-page))
+  (draw-page home-page))
